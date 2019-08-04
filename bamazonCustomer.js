@@ -17,7 +17,7 @@ var connection = mysql.createConnection({
 });
 
 connectSQL();
-
+queryAll();
 // connect to mysql
 function connectSQL() {
     connection.connect(function (err) {
@@ -32,7 +32,10 @@ function connectSQL() {
 
 // query mysql for all data
 function queryAll() {
-
+    connection.query('SELECT * FROM products', function (err, res) {
+        if (err) throw err;
+        console.log(res);
+    });
 };
 
 // The app should then prompt users with two messages.
