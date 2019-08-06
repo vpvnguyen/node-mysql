@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     host: "localhost",
 
     // Your port; if not 3306
-    port: 3306,
+    port: 8889,
 
     // Your username
     user: "root",
@@ -16,8 +16,7 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-connectSQL();
-queryAll();
+
 // connect to mysql
 function connectSQL() {
     connection.connect(function (err) {
@@ -48,18 +47,30 @@ function queryAll() {
 
 // start a prompt to ask what items the customer wants to buy
 function start() {
-    queryAll();
+
     inquirer.prompt([
         {
             type: "list",
-            message: "What do you want to buy?",
-            name: "question1",
-            choices: ['POST', 'BID']
+            message: "What do you want to do?",
+            name: "welcome",
+            choices: ['BUY', 'EXIT']
         }
     ]).then(function (res) {
-        console.log(res);
+
+        // ask customer's what they want to buy from the list of items in inventory
+        console.log(`id: ${res[i].item_id}`);
+
+
+        // console.log(res);
     });
 };
+
+function firstthingtorun() {
+    connectSQL();
+    queryAll();
+}
+firstthingtorun();
+start();
 // The app should then prompt users with two messages.
 
 // The first should ask them the ID of the product they would like to buy.
@@ -132,3 +143,4 @@ function start() {
 // Hint: You may need to look into GROUP BYs.
 // Hint: You may need to look into JOINS.
 // HINT: There may be an NPM package that can log the table to the console. What's is it? Good question :)
+
