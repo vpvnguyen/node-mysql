@@ -22,9 +22,8 @@ function connectSQL() {
     connection.connect(function (err) {
         if (err) throw err;
         console.log("connected as id " + connection.threadId);
-
         // comment in or out to stop or start connection
-        connection.end();
+        // connection.end();
     });
 };
 
@@ -42,35 +41,68 @@ function queryAll() {
             console.log(`Price: ${res[i].price}`);
             console.log(`Stock: ${res[i].stock_quantity}`);
         }
+        promptBuy();
+
     });
 };
 
 // start a prompt to ask what items the customer wants to buy
-function start() {
+function promptBuy() {
+
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Would you like to purchase something?",
+            name: "buyOption",
+            choices: ['BUY', 'EXIT']
+        }
+    ]).then(function (res) {
+
+        // ask customer's what they want to buy from the list of items in inventory
+        console.log(res);
+
+        // console.log(res);
+    });
+};
+
+// start a prompt to ask what items the customer wants to buy
+function welcome() {
 
     inquirer.prompt([
         {
             type: "list",
-            message: "What do you want to do?",
+            message: "Welcome! What would you like to do?",
             name: "welcome",
             choices: ['BUY', 'EXIT']
         }
     ]).then(function (res) {
 
         // ask customer's what they want to buy from the list of items in inventory
-        console.log(`id: ${res[i].item_id}`);
+        console.log(`User Selected: ${res.welcome}`);
 
+        if (res.welcome === 'BUY') {
+            connectSQL();
+            queryAll();
+        } else if (res.welcome === 'EXIT') {
+            quit();
+        }
 
         // console.log(res);
     });
 };
 
+function quit() {
+    connection.end();
+    process.exit();
+}
+
 function firstthingtorun() {
-    connectSQL();
-    queryAll();
+    // connectSQL();
+    // queryAll();
+    welcome();
+
 }
 firstthingtorun();
-start();
 // The app should then prompt users with two messages.
 
 // The first should ask them the ID of the product they would like to buy.
