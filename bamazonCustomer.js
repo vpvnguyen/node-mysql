@@ -27,25 +27,26 @@ function connectSQL() {
     });
 };
 
-function purchase(quantity, productID) {
+function purchase(productID, quantity) {
     connection.query('SELECT stock_quantity FROM products WHERE item_id=?', productID, function (err, res) {
         if (err) throw err;
         var updatedQuantity = res[0].stock_quantity - quantity;
         console.log(`Current Quantity: ${res[0].stock_quantity}`);
         console.log(`Updated Quantity: ${updatedQuantity}`);
 
-        connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
-            if (err) throw err;
-            console.log(`Thank you for your purchase!\n`);
-            console.log(`Product Purchased: ${JSON.stringify(res.affectedRows)}`);
-            // console.log(`Stock Left: ${JSON.stringify(res[0].stock_quantity)}`);
-            connection.end();
-
-        })
-
-    })
-
-
+        if (updatedQuantity > 0) {
+            connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
+                if (err) throw err;
+                console.log(`Thank you for your purchase!\n`);
+                // console.log(`Product Purchased: ${JSON.stringify(res[0])}`);
+                // console.log(`Stock Left: ${JSON.stringify(res[0].stock_quantity)}`);
+                quit();
+            });
+        } else {
+            console.log('Sorry! We are out of stock!');
+            quit();
+        }
+    });
 };
 
 // query mysql for all data
