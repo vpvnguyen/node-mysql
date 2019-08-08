@@ -9,8 +9,6 @@
 // If a manager selects Add to Inventory, your app should display a prompt that will let the manager "add more" of any item currently in the store.
 // If a manager selects Add New Product, it should allow the manager to add a completely new product to the store.
 
-// experiemnt with getting query response to global
-var queryAllProducts;
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 
@@ -47,9 +45,9 @@ function managerView() {
         if (choice.managerOption === 'View Products for Sale') {
             productsForSale();
         } else if (choice.managerOption === 'View Low Inventory') {
-            lowInventory(queryAllProducts);
+            lowInventory();
         } else if (choice.managerOption === 'Add to Inventory') {
-            console.log(choice.managerOption);
+            addStock();
         } else if (choice.managerOption === 'Add New Product') {
             console.log(choice.managerOption);
         } else if (choice.managerOption === 'EXIT') {
@@ -65,23 +63,6 @@ function connectSQL() {
         console.log("connected as id " + connection.threadId);
     });
 };
-// experiemnt with getting query response to global
-function queryAll() {
-    connection.query('SELECT * FROM products', function (err, allProducts) {
-        if (err) throw err;
-        for (var i = 0; i < allProducts.length; i++) {
-            // console.log(res[i]);
-            console.log(`\n`);
-            console.log(`id: ${allProducts[i].item_id}`);
-            console.log(`Item: ${allProducts[i].product_name}`);
-            console.log(`Department: ${allProducts[i].department_name}`);
-            console.log(`Price: ${allProducts[i].price}`);
-            console.log(`Stock: ${allProducts[i].stock_quantity}`);
-        }
-        queryAllProducts = allProducts;
-    });
-}
-
 
 // query mysql for all data
 function productsForSale() {
@@ -95,25 +76,78 @@ function productsForSale() {
             console.log(`Department: ${allProducts[i].department_name}`);
             console.log(`Price: ${allProducts[i].price}`);
             console.log(`Stock: ${allProducts[i].stock_quantity}`);
+            console.log(`\n`);
         }
         managerView();
     });
 };
 
 function lowInventory() {
-    connection.query('SELECT * FROM products', function (err, allProducts) {
+    connection.query('SELECT * FROM products WHERE stock_quantity <= 5', function (err, allProducts) {
         if (err) throw err;
         for (var i = 0; i < allProducts.length; i++) {
             // console.log(res[i]);
             console.log(`\n`);
+            console.log('Here are all the items that are low in stock!')
             console.log(`id: ${allProducts[i].item_id}`);
             console.log(`Item: ${allProducts[i].product_name}`);
             console.log(`Department: ${allProducts[i].department_name}`);
             console.log(`Price: ${allProducts[i].price}`);
             console.log(`Stock: ${allProducts[i].stock_quantity}`);
+            console.log(`\n`);
+        }
+        managerView();
+    });
+};
+
+function addStock() {
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "What would you like to do?",
+            name: "stock",
+            choices: ['Add to Stock', 'EXIT']
+        }
+    ]).then(function (choice) {
+        if (choice.stock === 'Add to Stock') {
+            
+            inquirer.prompt([
+                {
+                    type: "input",
+                    message: "Enter the ID of item you want to add:",
+                    name: "id",
+                    validate: function (input) {
+                        if (!isNaN(input) && Number(input) <= allProducts.length && Number(input) > 0) {
+                            return true;
+                        } else {
+                            console.log(' <- is not a valid number.');
+                            return false;
+                        }
+                    }
+                },
+                {
+                    type: "input",
+                    name: "quantity",
+                    message: "How many would you like to add?",
+                    validate: function (input) {
+                        if (isNaN(input) && Number(input) >= 0) {
+                            console.log(' <- is not a valid number.');
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            ]).then(function (item) {
+                console.log('\n');
+                console.log(item.id, item.quantity)
+            });
+        } else if (choice.stock === 'EXIT') {
+            quit();
         }
     });
 };
+
 
 function quit() {
     console.log('Exiting System');
@@ -122,8 +156,4 @@ function quit() {
 };
 
 connectSQL();
-// managerView();
-
-// experiemnt with getting query response to global
-queryAll();
-console.log(queryAllProducts)
+managerView();
