@@ -27,6 +27,26 @@ function connectSQL() {
     });
 };
 
+function purchase(quantity, productID) {
+    connection.query('SELECT stock_quantity FROM products WHERE item_id=?', productID, function (err, res) {
+        if (err) throw err;
+        var updatedQuantity = res[0].stock_quantity - quantity;
+        console.log(`Current Quantity: ${res[0].stock_quantity}`);
+        console.log(`Updated Quantity: ${updatedQuantity}`);
+
+        connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
+            if (err) throw err;
+            console.log(`Thank you for your purchase!\n`);
+            console.log(`Product Purchased: ${JSON.stringify(res.affectedRows)}`);
+            // console.log(`Stock Left: ${JSON.stringify(res[0].stock_quantity)}`);
+            connection.end();
+
+        })
+
+    })
+
+
+};
 
 // query mysql for all data
 function queryAll() {
@@ -41,27 +61,47 @@ function queryAll() {
             console.log(`Price: ${res[i].price}`);
             console.log(`Stock: ${res[i].stock_quantity}`);
         }
-        promptBuy();
+
+        // pass in results of all products in db
+        promptBuy(res);
 
     });
 };
 
 // start a prompt to ask what items the customer wants to buy
-function promptBuy() {
+function promptBuy(allProducts) {
 
     inquirer.prompt([
         {
             type: "input",
-            message: "Would you like to purchase something?",
-            name: "buyOption",
-            choices: ['BUY', 'EXIT']
+            message: "Enter the ID of item you want to buy:",
+            name: "id",
+            validate: function (input) {
+                if (isNaN(input) == false && Number(input) <= allProducts.length && Number(input) > 0) {
+                    return true;
+                } else {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: "input",
+            name: "quantity",
+            message: "How many would you like to buy?",
+            validate: function (input) {
+                if (isNaN(input)) {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                } else {
+                    return true;
+                }
+            }
         }
     ]).then(function (res) {
-
+        console.log('\n');
         // ask customer's what they want to buy from the list of items in inventory
-        console.log(res);
-
-        // console.log(res);
+        purchase(res.id, res.quantity);
     });
 };
 
