@@ -25,27 +25,6 @@ function connectSQL() {
     });
 };
 
-// pass in product ID and quantity; run transaction if stock is available
-function purchase(productID, quantity) {
-    connection.query('SELECT stock_quantity FROM products WHERE item_id=?', productID, function (err, item) {
-        if (err) throw err;
-        var updatedQuantity = item[0].stock_quantity - quantity;
-        console.log(`Current Quantity: ${item[0].stock_quantity}`);
-        console.log(`Updated Quantity: ${updatedQuantity}`);
-
-        if (updatedQuantity > 0) {
-            connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
-                if (err) throw err;
-                console.log(`Thank you for your purchase!\n`);
-                quit();
-            });
-        } else {
-            console.log('Sorry! We are out of stock!');
-            quit();
-        }
-    });
-};
-
 // query mysql for all data
 function buy() {
     connection.query('SELECT * FROM products', function (err, allProducts) {
@@ -104,6 +83,47 @@ function promptBuy(allProducts) {
     });
 };
 
+// pass in product ID and quantity; run transaction if stock is available
+function purchase(productID, quantity) {
+    connection.query('SELECT * FROM products WHERE item_id=?', productID, function (err, item) {
+        if (err) throw err;
+        var updatedQuantity = item[0].stock_quantity - quantity;
+        var totalSale = item[0].price * item[0].stock_quantity;
+        console.log(`Purchase of ${updatedQuantity}x ${item[0].product_name} complete!`);
+        console.log(`Total: $${totalSale}`);
+        console.log(`Previous Quantity: ${item[0].stock_quantity}`);
+        console.log(`Updated Quantity: ${updatedQuantity}`);
+
+        if (updatedQuantity > 0) {
+            connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
+                if (err) throw err;
+                console.log(`Thank you for your purchase!\n`);
+                buyAgain();
+            });
+        } else {
+            console.log('Sorry! We are out of stock!');
+            welcome();
+        }
+    });
+};
+
+function buyAgain() {
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "Would you like to purchase another product?",
+            name: "buyAgain",
+            choices: ['BUY AGAIN', 'EXIT']
+        }
+    ]).then(function (choice) {
+        if (choice.buyAgain === 'BUY AGAIN') {
+            buy();
+        } else if (choice.buyAgain === 'EXIT') {
+            quit();
+        }
+
+    });
+};
 // start a prompt to ask what items the customer wants to buy
 function welcome() {
 
@@ -131,6 +151,7 @@ function welcome() {
 };
 
 function quit() {
+    console.log('Thank you! Good Bye.');
     connection.end();
     process.exit();
 };
@@ -142,8 +163,6 @@ welcome();
 // The first should ask them the ID of the product they would like to buy.
 // The second message should ask how many units of the product they would like to buy.
 
-
-
 // Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
 
 // If not, the app should log a phrase like Insufficient quantity!, and then prevent the order from going through.
@@ -151,7 +170,7 @@ welcome();
 // However, if your store does have enough of the product, you should fulfill the customer's order.
 
 // This means updating the SQL database to reflect the remaining quantity.
-// Once the update goes through, show the customer the total cost of their purchase.
+
 
 
 // -------------------
