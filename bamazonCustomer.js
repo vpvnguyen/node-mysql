@@ -22,24 +22,21 @@ function connectSQL() {
     connection.connect(function (err) {
         if (err) throw err;
         console.log("connected as id " + connection.threadId);
-        // comment in or out to stop or start connection
-        // connection.end();
     });
 };
 
+// pass in product ID and quantity; run transaction if stock is available
 function purchase(productID, quantity) {
-    connection.query('SELECT stock_quantity FROM products WHERE item_id=?', productID, function (err, res) {
+    connection.query('SELECT stock_quantity FROM products WHERE item_id=?', productID, function (err, item) {
         if (err) throw err;
-        var updatedQuantity = res[0].stock_quantity - quantity;
-        console.log(`Current Quantity: ${res[0].stock_quantity}`);
+        var updatedQuantity = item[0].stock_quantity - quantity;
+        console.log(`Current Quantity: ${item[0].stock_quantity}`);
         console.log(`Updated Quantity: ${updatedQuantity}`);
 
         if (updatedQuantity > 0) {
             connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
                 if (err) throw err;
                 console.log(`Thank you for your purchase!\n`);
-                // console.log(`Product Purchased: ${JSON.stringify(res[0])}`);
-                // console.log(`Stock Left: ${JSON.stringify(res[0].stock_quantity)}`);
                 quit();
             });
         } else {
@@ -50,21 +47,21 @@ function purchase(productID, quantity) {
 };
 
 // query mysql for all data
-function queryAll() {
-    connection.query('SELECT * FROM products', function (err, res) {
+function buy() {
+    connection.query('SELECT * FROM products', function (err, allProducts) {
         if (err) throw err;
-        for (var i = 0; i < res.length; i++) {
+        for (var i = 0; i < allProducts.length; i++) {
             // console.log(res[i]);
             console.log(`\n`);
-            console.log(`id: ${res[i].item_id}`);
-            console.log(`Item: ${res[i].product_name}`);
-            console.log(`Department: ${res[i].department_name}`);
-            console.log(`Price: ${res[i].price}`);
-            console.log(`Stock: ${res[i].stock_quantity}`);
+            console.log(`id: ${allProducts[i].item_id}`);
+            console.log(`Item: ${allProducts[i].product_name}`);
+            console.log(`Department: ${allProducts[i].department_name}`);
+            console.log(`Price: ${allProducts[i].price}`);
+            console.log(`Stock: ${allProducts[i].stock_quantity}`);
         }
 
         // pass in results of all products in db
-        promptBuy(res);
+        promptBuy(allProducts);
 
     });
 };
@@ -99,10 +96,11 @@ function promptBuy(allProducts) {
                 }
             }
         }
-    ]).then(function (res) {
+    ]).then(function (item) {
         console.log('\n');
-        // ask customer's what they want to buy from the list of items in inventory
-        purchase(res.id, res.quantity);
+
+        // start purchase transaction
+        purchase(item.id, item.quantity);
     });
 };
 
@@ -116,34 +114,29 @@ function welcome() {
             name: "welcome",
             choices: ['BUY', 'EXIT']
         }
-    ]).then(function (res) {
+    ]).then(function (choice) {
 
         // ask customer's what they want to buy from the list of items in inventory
-        console.log(`User Selected: ${res.welcome}`);
+        console.log(`User Selected: ${choice.welcome}`);
 
-        if (res.welcome === 'BUY') {
+        if (choice.welcome === 'BUY') {
+            // connect to mysql and start buying process
             connectSQL();
-            queryAll();
-        } else if (res.welcome === 'EXIT') {
+            buy();
+        } else if (choice.welcome === 'EXIT') {
+            // end mysql connection and app
             quit();
         }
-
-        // console.log(res);
     });
 };
 
 function quit() {
     connection.end();
     process.exit();
-}
+};
 
-function firstthingtorun() {
-    // connectSQL();
-    // queryAll();
-    welcome();
+welcome();
 
-}
-firstthingtorun();
 // The app should then prompt users with two messages.
 
 // The first should ask them the ID of the product they would like to buy.
