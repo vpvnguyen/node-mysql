@@ -55,7 +55,6 @@ function managerView() {
         } else if (choice.managerOption === 'EXIT') {
             quit();
         }
-
     });
 };
 
@@ -82,7 +81,6 @@ function lowInventory() {
         if (err) throw err;
         console.log('Here are all the items that are low in stock!')
         for (var i = 0; i < allProducts.length; i++) {
-            // console.log(res[i]);
             console.log(`\n`);
             console.log(`id: ${allProducts[i].item_id}`);
             console.log(`Item: ${allProducts[i].product_name}`);
@@ -143,6 +141,7 @@ function updateStock() {
             }
         }
     ]).then(function (item) {
+        // select stock of product from id and calculate new stock quantity
         connection.query(`SELECT stock_quantity, product_name FROM products WHERE item_id = ?`, item.id, function (err, stock) {
             if (err) throw err;
             var updatedStock = Number(item.quantity) + Number(stock[0].stock_quantity);
@@ -157,6 +156,7 @@ function updateStock() {
     });
 };
 
+// prompt user to input description of new product
 function addNewProduct() {
     inquirer.prompt([
         {
@@ -200,6 +200,7 @@ function addNewProduct() {
     });
 };
 
+// insert new product into table
 function insertNewProduct(newProduct) {
     console.log(`Product: ${newProduct.productName}`);
     console.log(`Department: ${newProduct.departmentName}`);
