@@ -1,9 +1,3 @@
-// -------------------
-// Challenge #2: Manager View (Next Level)
-// Create a new Node application called bamazonManager.js. Running this application will:
-
-
-
 // If a manager selects View Products for Sale, the app should list every available item: the item IDs, names, prices, and quantities.
 // If a manager selects View Low Inventory, then it should list all items with an inventory count lower than five.
 // If a manager selects Add to Inventory, your app should display a prompt that will let the manager "add more" of any item currently in the store.
@@ -16,7 +10,7 @@ var inquirer = require('inquirer');
 var connection = mysql.createConnection({
     host: "localhost",
 
-    // Your port; if not 3306
+    // Your port; if not 8889
     port: 8889,
 
     // Your username
@@ -26,6 +20,15 @@ var connection = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
+
+// connect to mysql and start manager view
+function startApp() {
+    connection.connect(function (err) {
+        if (err) throw err;
+        console.log("connected as id " + connection.threadId);
+        managerView();
+    });
+};
 
 // List a set of menu options:
 // View Products for Sale
@@ -41,26 +44,18 @@ function managerView() {
             choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'EXIT']
         }
     ]).then(function (choice) {
-        console.log(choice.managerOption)
         if (choice.managerOption === 'View Products for Sale') {
             productsForSale();
         } else if (choice.managerOption === 'View Low Inventory') {
             lowInventory();
         } else if (choice.managerOption === 'Add to Inventory') {
-            addStock();
+            inventoryOptions();
         } else if (choice.managerOption === 'Add New Product') {
-            console.log(choice.managerOption);
+            addNewProduct();
         } else if (choice.managerOption === 'EXIT') {
             quit();
         }
 
-    });
-};
-// connect to mysql
-function connectSQL() {
-    connection.connect(function (err) {
-        if (err) throw err;
-        console.log("connected as id " + connection.threadId);
     });
 };
 
@@ -69,7 +64,6 @@ function productsForSale() {
     connection.query('SELECT * FROM products', function (err, allProducts) {
         if (err) throw err;
         for (var i = 0; i < allProducts.length; i++) {
-            // console.log(res[i]);
             console.log(`\n`);
             console.log(`id: ${allProducts[i].item_id}`);
             console.log(`Item: ${allProducts[i].product_name}`);
@@ -82,13 +76,14 @@ function productsForSale() {
     });
 };
 
+// check if inventory is low
 function lowInventory() {
     connection.query('SELECT * FROM products WHERE stock_quantity <= 5', function (err, allProducts) {
         if (err) throw err;
+        console.log('Here are all the items that are low in stock!')
         for (var i = 0; i < allProducts.length; i++) {
             // console.log(res[i]);
             console.log(`\n`);
-            console.log('Here are all the items that are low in stock!')
             console.log(`id: ${allProducts[i].item_id}`);
             console.log(`Item: ${allProducts[i].product_name}`);
             console.log(`Department: ${allProducts[i].department_name}`);
@@ -100,7 +95,8 @@ function lowInventory() {
     });
 };
 
-function addStock() {
+// prompt inventory options
+function inventoryOptions() {
     inquirer.prompt([
         {
             type: "list",
@@ -110,50 +106,118 @@ function addStock() {
         }
     ]).then(function (choice) {
         if (choice.stock === 'Add to Stock') {
-            
-            inquirer.prompt([
-                {
-                    type: "input",
-                    message: "Enter the ID of item you want to add:",
-                    name: "id",
-                    validate: function (input) {
-                        if (!isNaN(input) && Number(input) <= allProducts.length && Number(input) > 0) {
-                            return true;
-                        } else {
-                            console.log(' <- is not a valid number.');
-                            return false;
-                        }
-                    }
-                },
-                {
-                    type: "input",
-                    name: "quantity",
-                    message: "How many would you like to add?",
-                    validate: function (input) {
-                        if (isNaN(input) && Number(input) >= 0) {
-                            console.log(' <- is not a valid number.');
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    }
-                }
-            ]).then(function (item) {
-                console.log('\n');
-                console.log(item.id, item.quantity)
-            });
+            updateStock();
         } else if (choice.stock === 'EXIT') {
             quit();
         }
     });
 };
 
+// select item quantity and update stock
+function updateStock() {
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Enter the ID of item you want to add:",
+            name: "id",
+            validate: function (input) {
+                if (!isNaN(input) && Number(input) > 0) {
+                    return true;
+                } else {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: "input",
+            name: "quantity",
+            message: "How many would you like to add?",
+            validate: function (input) {
+                if (isNaN(input) && Number(input) >= 0) {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    ]).then(function (item) {
+        connection.query(`SELECT stock_quantity, product_name FROM products WHERE item_id = ?`, item.id, function (err, stock) {
+            if (err) throw err;
+            var updatedStock = Number(item.quantity) + Number(stock[0].stock_quantity);
+            console.log(`item_id: ${Number(item.id)} | Product: ${stock[0].product_name} | Stock: ${updatedStock}`);
 
+            // update item_id and item_quantity
+            connection.query(`UPDATE products SET stock_quantity = ? WHERE item_ID = ?`, [updatedStock, item.id], function (err, res) {
+                if (err) throw err;
+                managerView();
+            });
+        });
+    });
+};
+
+function addNewProduct() {
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Enter product name: ",
+            name: "productName"
+        },
+        {
+            type: "input",
+            message: "Enter department name: ",
+            name: "departmentName"
+        },
+        {
+            type: "input",
+            message: "Price: ",
+            name: "price",
+            validate: function (input) {
+                if (isNaN(input) && Number(input) >= 0) {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        },
+        {
+            type: "input",
+            message: "How many would you like to add?",
+            name: "stock",
+            validate: function (input) {
+                if (isNaN(input) && Number(input) >= 0) {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    ]).then(function (newProduct) {
+        insertNewProduct(newProduct);
+    });
+};
+
+function insertNewProduct(newProduct) {
+    console.log(`Product: ${newProduct.productName}`);
+    console.log(`Department: ${newProduct.departmentName}`);
+    console.log(`Price: ${newProduct.price}`);
+    console.log(`Stock: ${newProduct.stock}`);
+    connection.query(`INSERT INTO products (product_name, department_name, price, stock_quantity)
+        VALUE (?, ?, ?, ?)`, [newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock], function (err, res) {
+            if (err) throw err;
+            console.log(res)
+            managerView();
+        });
+};
+
+// quit app
 function quit() {
     console.log('Exiting System');
     connection.end();
     process.exit();
 };
 
-connectSQL();
-managerView();
+startApp();
