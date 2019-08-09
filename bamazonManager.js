@@ -208,7 +208,6 @@ function insertNewProduct(newProduct) {
     connection.query(`INSERT INTO products (product_name, department_name, price, stock_quantity)
         VALUE (?, ?, ?, ?)`, [newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock], function (err, res) {
             if (err) throw err;
-            console.log(res)
             managerView();
         });
 };
