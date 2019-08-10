@@ -109,6 +109,7 @@ function purchase(productID, quantity) {
     });
 };
 
+// prompt customer if they want to buy after transaction
 function buyAgain() {
     inquirer.prompt([
         {
@@ -153,6 +154,7 @@ function welcome() {
     });
 };
 
+// quit app
 function quit() {
     console.log('Thank you! Good Bye.');
     connection.end();
