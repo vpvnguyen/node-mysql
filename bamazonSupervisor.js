@@ -11,11 +11,12 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-// connect to mysql
-function connectSQL() {
+// connect to mysql and start supervisor view
+function startApp() {
     connection.connect(function (err) {
         if (err) throw err;
         console.log("connected as id " + connection.threadId);
+        console.log('\n');
         superView();
     });
 };
@@ -46,27 +47,30 @@ function superView() {
 // product_sales 20000 100000 - products
 // total_profit 10000 40000 - product_sales(prod) - over_head_costs(prod)
 
-
 // get product sales by 
 function productSales() {
     console.log('product sales');
+    console.log('\n');
     superView();
 
 };
 
+// creates a new department in departments db
 function createNewDept() {
     console.log('create new dept')
+    console.log('\n');
     superView();
 
 };
 
 // quit app
 function quit() {
-    console.log('Exiting System');
+    console.log('Exiting System. Good Bye.');
     connection.end();
     process.exit();
 };
-connectSQL();
+
+startApp();
 
 // Modify the products table so that there's a product_sales column, and modify your bamazonCustomer.js app so that when a customer purchases anything from the store, the price of the product multiplied by the quantity purchased is added to the product's product_sales column.
 // Make sure your app still updates the inventory listed in the products column.
