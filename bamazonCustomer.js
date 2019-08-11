@@ -99,11 +99,13 @@ function purchase(productID, quantity) {
         if (err) throw err;
         var updatedQuantity = item[0].stock_quantity - quantity;
         var totalSale = item[0].price * item[0].stock_quantity;
+        var productSalesTotal = item[0].product_sales + totalSale;
 
+        console.log(`Product Sales Total: ${productSalesTotal}`)
         console.log(`Selected [${quantity}x] of [${item[0].product_name}]...`);
 
         if (updatedQuantity > 0) {
-            connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
+            connection.query('UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?', [updatedQuantity, productSalesTotal, productID], function (err, res) {
                 if (err) throw err;
                 console.log(`Total: $${totalSale}`);
                 console.log(`Thank you for your purchase!\n`);
