@@ -52,7 +52,7 @@ function productSales() {
         `SELECT department_id, departments.department_name, over_head_costs, SUM(product_sales) AS product_sales, SUM(product_sales) - over_head_costs AS total_profit 
         FROM departments 
         INNER JOIN products ON departments.department_name = products.department_name 
-        GROUP BY department_id`
+        GROUP BY department_id`;
 
     connection.query(query, function (err, res) {
         if (err) throw err;
@@ -75,10 +75,60 @@ function productSales() {
 
 // creates a new department in departments db
 function createNewDept() {
-    console.log('create new dept')
-    console.log('\n');
-    superView();
+    // isn't adding a dept that already exists
+    connection.query("SELECT * FROM departments", function (error, results) {
+        if (error) throw error;
+        // display current departments
+        // var table = new Table({
+        //     head: ['department_id', 'department_name', 'over_head_costs', 'product_sales', 'total_profit'],
+        //     colWidths: [15, 20, 20, 18, 18]
+        // });
 
+        // for (var i = 0; i < res.length; i++) {
+        //     table.push([res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, res[i].total_profit]);
+        // }
+
+        // console.log('\n');
+        // console.log(table.toString());
+        console.log(results)
+
+        // ======================
+        // // ask for new dept name and overhead for it
+        // inquirer.prompt([
+        //     {
+        //         name: "name",
+        //         message: "Please input new department name.",
+        //         // validating dept doesn't already exist
+        //         validate: function (value) {
+        //             // create empty dept array
+        //             var deptArray = [];
+        //             // push all current depts to array
+        //             for (var i = 0; i < results.length; i++) {
+        //                 deptArray.push(results[i].department_name.toLowerCase());
+        //             }
+        //             // if supervisor input not in array, return true, else return false
+        //             if (deptArray.indexOf(value.toLowerCase()) === -1) {
+        //                 return true;
+        //             }
+        //             return false;
+        //         }
+        //     },
+        //     {
+        //         name: "overhead",
+        //         message: "Input new department overhead costs.",
+        //         // validate the overhead is a number larger than 0
+        //         validate: function (value) {
+        //             if (isNaN(value) === false && value > 0) {
+        //                 return true;
+        //             }
+        //             return false;
+        //         }
+        //     }
+        // ]).then(function (newDept) {
+        //     console.log('\n');
+        //     superView();
+        // });
+    });
 };
 
 // quit app
