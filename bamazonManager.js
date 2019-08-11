@@ -31,11 +31,7 @@ function startApp() {
     });
 };
 
-// List a set of menu options:
-// View Products for Sale
-// View Low Inventory
-// Add to Inventory
-// Add New Product
+// prompt manager view options
 function managerView() {
     inquirer.prompt([
         {
@@ -64,11 +60,6 @@ function productsForSale() {
     connection.query('SELECT * FROM products', function (err, allProducts) {
         if (err) throw err;
 
-        // var productsColumns = [];
-        // var productsWidths = [];
-        // var width;
-        // var productInfo = [];
-
         // instantiate
         var table = new Table({
             head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
@@ -76,20 +67,7 @@ function productsForSale() {
         });
 
         for (var i = 0; i < allProducts.length; i++) {
-            // console.log(`\n`);
-            // // productsColumns = Object.keys(allProducts[i])
-            // // width = Number(allProducts.length) * 2;
-            // // productInfo.push(allProducts[i]);
-
-
-            // console.log(`id: ${allProducts[i].item_id}`);
-            // console.log(`Item: ${allProducts[i].product_name}`);
-            // console.log(`Department: ${allProducts[i].department_name}`);
-            // console.log(`Price: ${allProducts[i].price}`);
-            // console.log(`Stock: ${allProducts[i].stock_quantity}`);
-            // console.log(`\n`);
             table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity, allProducts[i].product_sales]);
-
         }
         console.log(table.toString());
         managerView();
@@ -107,17 +85,10 @@ function lowInventory() {
         });
 
         for (var i = 0; i < allProducts.length; i++) {
-            // console.log(`\n`);
-            // console.log(`id: ${allProducts[i].item_id}`);
-            // console.log(`Item: ${allProducts[i].product_name}`);
-            // console.log(`Department: ${allProducts[i].department_name}`);
-            // console.log(`Price: ${allProducts[i].price}`);
-            // console.log(`Stock: ${allProducts[i].stock_quantity}`);
-            // console.log(`\n`);
             table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].stock_quantity])
         }
         console.log(table.toString());
-        console.log('All items that are low in stock!');
+        console.log('All items low in stock!');
         managerView();
     });
 };
@@ -174,7 +145,12 @@ function updateStock() {
         connection.query(`SELECT stock_quantity, product_name FROM products WHERE item_id = ?`, item.id, function (err, stock) {
             if (err) throw err;
             var updatedStock = Number(item.quantity) + Number(stock[0].stock_quantity);
-            console.log(`item_id: ${Number(item.id)} | Product: ${stock[0].product_name} | Stock: ${updatedStock}`);
+            var table = new Table({
+                head: ['item_id', 'product_name', 'stock_quantity'],
+                colWidths: [10, 15, 18]
+            });
+            table.push([Number(item.id), stock[0].product_name, updatedStock]);
+            console.log(table.toString());
 
             // update item_id and item_quantity
             connection.query(`UPDATE products SET stock_quantity = ? WHERE item_ID = ?`, [updatedStock, item.id], function (err, res) {
@@ -225,16 +201,21 @@ function addNewProduct() {
             }
         }
     ]).then(function (newProduct) {
+        // pass in new product to insert into mysql
         insertNewProduct(newProduct);
     });
 };
 
-// insert new product into table
+// insert new product into products table
 function insertNewProduct(newProduct) {
-    console.log(`Product: ${newProduct.productName}`);
-    console.log(`Department: ${newProduct.departmentName}`);
-    console.log(`Price: ${newProduct.price}`);
-    console.log(`Stock: ${newProduct.stock}`);
+    var table = new Table({
+        head: ['product_name', 'department_name', 'price', 'stock_quantity',],
+        colWidths: [25, 20, 10, 20]
+    });
+    table.push([newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock]);
+    console.log(table.toString());
+    console.log('New Product has been added!');
+
     connection.query(`INSERT INTO products (product_name, department_name, price, stock_quantity, product_sales)
         VALUE (?, ?, ?, ?, 0)`, [newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock],
         function (err, res) {
