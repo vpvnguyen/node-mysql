@@ -154,6 +154,7 @@ function customerView() {
 
 // quit app
 function quit() {
+    console.log('\n');
     console.log('Thank you! Good Bye.');
     connection.end();
     process.exit();
