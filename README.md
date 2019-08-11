@@ -8,13 +8,13 @@ The app will:
 - Add and create new products and departments.
 
 
-### Setup & Requirements
+## Setup & Requirements
 - `git clone <repo>` or download zip
 - `npm install`
 - Configure your own MySQL connection in `bamazonCustomer.js`, `bamazonManager.js`, `bamazonSupervisor.js`
 - Connection sample:
 
-```
+```javascript
 var mysql = require('mysql');
 ...
 
@@ -30,10 +30,10 @@ var mysql = require('mysql');
 
 > Make sure you save and require the MySQL, Inquirer, and cli-table npm packages--your app will need them for data input and storage
 
-### Application
+## Application
 - run in terminal/bash: `node <filename.js>`
 
-### Technologies:
+## Technologies:
 - Node.js
 - MySQL
 - `npm inquirer`
