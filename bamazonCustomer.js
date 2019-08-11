@@ -10,6 +10,10 @@ var mysql = require('mysql');
 var inquirer = require('inquirer');
 var Table = require('cli-table');
 
+// for cli header
+// head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
+
+
 // create connection to mysql
 var connection = mysql.createConnection({
     host: "localhost",
