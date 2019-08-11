@@ -20,11 +20,12 @@ function connectSQL() {
     });
 };
 
+// prompt for supervisor options
 function superView() {
     inquirer.prompt([
         {
             type: "list",
-            message: "Manager View - Select Options",
+            message: "Supervisor View - Select Options",
             name: "managerOption",
             choices: ['View Product Sales by Department', 'Create New Department', 'EXIT']
         }
@@ -39,6 +40,14 @@ function superView() {
     });
 };
 
+// department_id 01 02
+// department_name Electronics Clothing - department
+// over_head_costs 10000 60000 - products
+// product_sales 20000 100000 - products
+// total_profit 10000 40000 - product_sales(prod) - over_head_costs(prod)
+
+
+// get product sales by 
 function productSales() {
     console.log('product sales');
     superView();
