@@ -9,7 +9,7 @@ The app will:
 
 
 ## Setup & Requirements
-- `git clone <repo>` or download zip.
+- `git clone <repo>`.
 - `npm install`.
 - Create mock database using `bamazon.sql`.
 - Configure your own MySQL connection in `bamazonCustomer.js`, `bamazonManager.js`, `bamazonSupervisor.js`.
