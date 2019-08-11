@@ -5,6 +5,7 @@
 
 var mysql = require('mysql');
 var inquirer = require('inquirer');
+var Table = require('cli-table');
 
 // create connection to mysql
 var connection = mysql.createConnection({
@@ -62,15 +63,35 @@ function managerView() {
 function productsForSale() {
     connection.query('SELECT * FROM products', function (err, allProducts) {
         if (err) throw err;
+
+        // var productsColumns = [];
+        // var productsWidths = [];
+        // var width;
+        // var productInfo = [];
+
+        // instantiate
+        var table = new Table({
+            head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
+            colWidths: [10, 25, 20, 10, 18, 15]
+        });
+
         for (var i = 0; i < allProducts.length; i++) {
-            console.log(`\n`);
-            console.log(`id: ${allProducts[i].item_id}`);
-            console.log(`Item: ${allProducts[i].product_name}`);
-            console.log(`Department: ${allProducts[i].department_name}`);
-            console.log(`Price: ${allProducts[i].price}`);
-            console.log(`Stock: ${allProducts[i].stock_quantity}`);
-            console.log(`\n`);
+            // console.log(`\n`);
+            // // productsColumns = Object.keys(allProducts[i])
+            // // width = Number(allProducts.length) * 2;
+            // // productInfo.push(allProducts[i]);
+
+
+            // console.log(`id: ${allProducts[i].item_id}`);
+            // console.log(`Item: ${allProducts[i].product_name}`);
+            // console.log(`Department: ${allProducts[i].department_name}`);
+            // console.log(`Price: ${allProducts[i].price}`);
+            // console.log(`Stock: ${allProducts[i].stock_quantity}`);
+            // console.log(`\n`);
+            table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity, allProducts[i].product_sales]);
+
         }
+        console.log(table.toString());
         managerView();
     });
 };
@@ -79,16 +100,24 @@ function productsForSale() {
 function lowInventory() {
     connection.query('SELECT * FROM products WHERE stock_quantity <= 5', function (err, allProducts) {
         if (err) throw err;
-        console.log('Here are all the items that are low in stock!')
+
+        var table = new Table({
+            head: ['item_id', 'product_name', 'stock_quantity'],
+            colWidths: [10, 15, 18]
+        });
+
         for (var i = 0; i < allProducts.length; i++) {
-            console.log(`\n`);
-            console.log(`id: ${allProducts[i].item_id}`);
-            console.log(`Item: ${allProducts[i].product_name}`);
-            console.log(`Department: ${allProducts[i].department_name}`);
-            console.log(`Price: ${allProducts[i].price}`);
-            console.log(`Stock: ${allProducts[i].stock_quantity}`);
-            console.log(`\n`);
+            // console.log(`\n`);
+            // console.log(`id: ${allProducts[i].item_id}`);
+            // console.log(`Item: ${allProducts[i].product_name}`);
+            // console.log(`Department: ${allProducts[i].department_name}`);
+            // console.log(`Price: ${allProducts[i].price}`);
+            // console.log(`Stock: ${allProducts[i].stock_quantity}`);
+            // console.log(`\n`);
+            table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].stock_quantity])
         }
+        console.log(table.toString());
+        console.log('All items that are low in stock!');
         managerView();
     });
 };
@@ -206,8 +235,9 @@ function insertNewProduct(newProduct) {
     console.log(`Department: ${newProduct.departmentName}`);
     console.log(`Price: ${newProduct.price}`);
     console.log(`Stock: ${newProduct.stock}`);
-    connection.query(`INSERT INTO products (product_name, department_name, price, stock_quantity)
-        VALUE (?, ?, ?, ?)`, [newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock], function (err, res) {
+    connection.query(`INSERT INTO products (product_name, department_name, price, stock_quantity, product_sales)
+        VALUE (?, ?, ?, ?, 0)`, [newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock],
+        function (err, res) {
             if (err) throw err;
             managerView();
         });
