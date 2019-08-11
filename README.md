@@ -34,13 +34,13 @@ var mysql = require('mysql');
 ## Application
 - Run in terminal/bash: `node <filename.js>`.
 
-- Store Front - Customer View
+### Store Front - Customer View
 > ![](./gif/github-customerview.gif)
 
-- Management - Manager View
+### Management - Manager View
 > ![](./gif/github-managerview.gif)
 
-- Management - Supervisor View
+### Management - Supervisor View
 > ![](./gif/github-supervisorview.gif)
 
 ## Technologies:
