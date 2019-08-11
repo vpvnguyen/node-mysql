@@ -231,6 +231,7 @@ function insertNewProduct(newProduct) {
 
 // quit app
 function quit() {
+    console.log('\n');
     console.log('Exiting System. Good Bye.');
     connection.end();
     process.exit();
