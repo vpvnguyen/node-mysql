@@ -18,10 +18,10 @@ The app will:
 > Make sure you save and require the MySQL and Inquirer npm packages--your app will need them for data input and storage.
 
 ### Application
-- run in terminal: `node <filename.js>`
+- run in terminal/bash: `node <filename.js>`
 
 ### Technologies:
-#### Node.js
-#### MySQL
-- npm inquirer
-- npm cli-table
+- Node.js
+- MySQL
+- `npm inquirer`
+- `npm cli-table`
