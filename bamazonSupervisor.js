@@ -7,18 +7,18 @@ var Table = require('cli-table');
 
 // create connection to mysql
 var connection = mysql.createConnection({
-    host: "localhost",
+    host: 'localhost',
     port: 8889,
-    user: "root",
-    password: "root",
-    database: "bamazon"
+    user: 'root',
+    password: 'root',
+    database: 'bamazon'
 });
 
 // connect to mysql and start supervisor view
 function startApp() {
     connection.connect(function (err) {
         if (err) throw err;
-        console.log("connected as id " + connection.threadId);
+        console.log('connected as id ' + connection.threadId);
         console.log('\n');
         superView();
     });
@@ -28,9 +28,9 @@ function startApp() {
 function superView() {
     inquirer.prompt([
         {
-            type: "list",
-            message: "Supervisor View - Select Options",
-            name: "managerOption",
+            type: 'list',
+            message: 'Supervisor View - Select Options',
+            name: 'managerOption',
             choices: ['View Product Sales by Department', 'Create New Department', 'EXIT']
         }
     ]).then(function (choice) {
@@ -66,73 +66,97 @@ function productSales() {
             table.push([res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, res[i].total_profit]);
         }
 
-        console.log('\n');
         console.log(table.toString());
-        console.log('Here are all of the coss and sales of each deparment!');
+        console.log('Department Overview');
+        console.log('\n');
         superView();
     });
 };
 
-// creates a new department in departments db
+// start creating a new department by querying for all avalable department names
 function createNewDept() {
-    // isn't adding a dept that already exists
-    connection.query("SELECT * FROM departments", function (error, results) {
-        if (error) throw error;
-        // display current departments
-        // var table = new Table({
-        //     head: ['department_id', 'department_name', 'over_head_costs', 'product_sales', 'total_profit'],
-        //     colWidths: [15, 20, 20, 18, 18]
-        // });
 
-        // for (var i = 0; i < res.length; i++) {
-        //     table.push([res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, res[i].total_profit]);
-        // }
+    connection.query('SELECT * FROM departments', function (err, res) {
+        if (err) throw err;
 
-        // console.log('\n');
-        // console.log(table.toString());
-        console.log(results)
+        var table = new Table({
+            head: ['department_id', 'department_name', 'over_head_costs'],
+            colWidths: [15, 20, 20]
+        });
 
-        // ======================
-        // // ask for new dept name and overhead for it
-        // inquirer.prompt([
-        //     {
-        //         name: "name",
-        //         message: "Please input new department name.",
-        //         // validating dept doesn't already exist
-        //         validate: function (value) {
-        //             // create empty dept array
-        //             var deptArray = [];
-        //             // push all current depts to array
-        //             for (var i = 0; i < results.length; i++) {
-        //                 deptArray.push(results[i].department_name.toLowerCase());
-        //             }
-        //             // if supervisor input not in array, return true, else return false
-        //             if (deptArray.indexOf(value.toLowerCase()) === -1) {
-        //                 return true;
-        //             }
-        //             return false;
-        //         }
-        //     },
-        //     {
-        //         name: "overhead",
-        //         message: "Input new department overhead costs.",
-        //         // validate the overhead is a number larger than 0
-        //         validate: function (value) {
-        //             if (isNaN(value) === false && value > 0) {
-        //                 return true;
-        //             }
-        //             return false;
-        //         }
-        //     }
-        // ]).then(function (newDept) {
-        //     console.log('\n');
-        //     superView();
-        // });
+        // hold avilable department names to check if name already exists
+        var deptNames = [];
+        for (var i = 0; i < res.length; i++) {
+            table.push([res[i].department_id, res[i].department_name, res[i].over_head_costs]);
+            deptNames.push(res[i].department_name.toLowerCase());
+
+        }
+
+        console.log('\n');
+        console.log(table.toString());
+        addDeptDetails(deptNames);
     });
+};
+
+// start prompt for department details and insert new department into db
+function addDeptDetails(deptNames) {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Enter new department name:',
+            name: 'departmentName',
+            validate: function (input) {
+                // if department already exists, return false
+                if (!deptNames.includes(input.toLowerCase())) {
+                    return true;
+                }
+                console.log(' <-- Duplicate department name')
+                return false;
+            }
+        },
+        {
+            type: 'input',
+            message: 'Enter new department over head cost:',
+            name: 'overHeadCost',
+            // input is > 0
+            validate: function (input) {
+                if (!isNaN(input) && input > 0) {
+                    return true;
+                }
+                console.log(' <-- Enter a number > 0')
+                return false;
+            }
+        }
+    ]).then(function (newDept) {
+        console.log('\n');
+        // pass in new department name and over head costs
+        insertNewDept(newDept.departmentName, newDept.overHeadCost);
+    });
+};
+
+// insert new department into departments table
+function insertNewDept(departmentName, overHeadCost) {
+
+    var table = new Table({
+        head: ['department_name', 'over_head_costs'],
+        colWidths: [25, 20]
+    });
+    table.push([departmentName, overHeadCost]);
+
+    connection.query(`INSERT INTO departments (department_name, over_head_costs)
+        VALUE (?, ?)`, [departmentName, overHeadCost],
+        function (err, res) {
+            if (err) throw err;
+            console.log(table.toString());
+            console.log('New department has been added!');
+            console.log('\n');
+            superView();
+        });
 };
 
 // quit app
 function quit() {
+    console.log('\n');
     console.log('Exiting System. Good Bye.');
     connection.end();
     process.exit();
