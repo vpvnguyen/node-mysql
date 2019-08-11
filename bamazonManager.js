@@ -1,6 +1,6 @@
 // If a manager selects View Products for Sale, the app should list every available item: the item IDs, names, prices, and quantities.
 // If a manager selects View Low Inventory, then it should list all items with an inventory count lower than five.
-// If a manager selects Add to Inventory, your app should display a prompt that will let the manager "add more" of any item currently in the store.
+// If a manager selects Add to Inventory, your app should display a prompt that will let the manager 'add more' of any item currently in the store.
 // If a manager selects Add New Product, it should allow the manager to add a completely new product to the store.
 
 var mysql = require('mysql');
@@ -9,18 +9,18 @@ var Table = require('cli-table');
 
 // create connection to mysql
 var connection = mysql.createConnection({
-    host: "localhost",
+    host: 'localhost',
     port: 8889,
-    user: "root",
-    password: "root",
-    database: "bamazon"
+    user: 'root',
+    password: 'root',
+    database: 'bamazon'
 });
 
 // connect to mysql and start manager view
 function startApp() {
     connection.connect(function (err) {
         if (err) throw err;
-        console.log("connected as id " + connection.threadId);
+        console.log('connected as id ' + connection.threadId);
         console.log('\n');
         managerView();
     });
@@ -30,9 +30,9 @@ function startApp() {
 function managerView() {
     inquirer.prompt([
         {
-            type: "list",
-            message: "Manager View - Select Options",
-            name: "managerOption",
+            type: 'list',
+            message: 'Manager View - Select Options',
+            name: 'managerOption',
             choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'EXIT']
         }
     ]).then(function (choice) {
@@ -55,7 +55,6 @@ function productsForSale() {
     connection.query('SELECT * FROM products', function (err, allProducts) {
         if (err) throw err;
 
-        // instantiate
         var table = new Table({
             head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
             colWidths: [10, 25, 20, 10, 18, 15]
@@ -64,6 +63,7 @@ function productsForSale() {
         for (var i = 0; i < allProducts.length; i++) {
             table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity, allProducts[i].product_sales]);
         }
+
         console.log(table.toString());
         console.log('\n');
         managerView();
@@ -83,6 +83,7 @@ function lowInventory() {
         for (var i = 0; i < allProducts.length; i++) {
             table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].stock_quantity]);
         }
+
         console.log(table.toString());
         console.log(`Found ${allProducts.length} items low in stock!`);
         console.log('\n');
@@ -94,9 +95,9 @@ function lowInventory() {
 function inventoryOptions() {
     inquirer.prompt([
         {
-            type: "list",
-            message: "What would you like to do?",
-            name: "stock",
+            type: 'list',
+            message: 'What would you like to do?',
+            name: 'stock',
             choices: ['Add to Stock', 'EXIT']
         }
     ]).then(function (choice) {
@@ -112,9 +113,9 @@ function inventoryOptions() {
 function updateStock() {
     inquirer.prompt([
         {
-            type: "input",
-            message: "Enter the ID of item you want to add:",
-            name: "id",
+            type: 'input',
+            message: 'Enter the ID of item you want to add:',
+            name: 'id',
             validate: function (input) {
                 if (!isNaN(input) && Number(input) > 0) {
                     return true;
@@ -125,9 +126,9 @@ function updateStock() {
             }
         },
         {
-            type: "input",
-            name: "quantity",
-            message: "How many would you like to add?",
+            type: 'input',
+            name: 'quantity',
+            message: 'How many would you like to add?',
             validate: function (input) {
                 if (isNaN(input) && Number(input) >= 0) {
                     console.log(' <- is not a valid number.');
@@ -169,19 +170,19 @@ function updateStock() {
 function addNewProduct() {
     inquirer.prompt([
         {
-            type: "input",
-            message: "Enter product name: ",
-            name: "productName"
+            type: 'input',
+            message: 'Enter product name: ',
+            name: 'productName'
         },
         {
-            type: "input",
-            message: "Enter department name: ",
-            name: "departmentName"
+            type: 'input',
+            message: 'Enter department name: ',
+            name: 'departmentName'
         },
         {
-            type: "input",
-            message: "Price: ",
-            name: "price",
+            type: 'input',
+            message: 'Price: ',
+            name: 'price',
             validate: function (input) {
                 if (isNaN(input) && Number(input) >= 0) {
                     console.log(' <- is not a valid number.');
@@ -192,9 +193,9 @@ function addNewProduct() {
             }
         },
         {
-            type: "input",
-            message: "How many would you like to add?",
-            name: "stock",
+            type: 'input',
+            message: 'How many would you like to add?',
+            name: 'stock',
             validate: function (input) {
                 if (isNaN(input) && Number(input) >= 0) {
                     console.log(' <- is not a valid number.');
@@ -212,10 +213,12 @@ function addNewProduct() {
 
 // insert new product into products table
 function insertNewProduct(newProduct) {
+
     var table = new Table({
         head: ['product_name', 'department_name', 'price', 'stock_quantity'],
         colWidths: [25, 20, 10, 20]
     });
+
     table.push([newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock]);
     console.log(table.toString());
     console.log('New Product has been added!');
