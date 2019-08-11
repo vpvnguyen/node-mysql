@@ -19,11 +19,12 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-// connect to mysql
-function connectSQL() {
+// connect to mysql and start customer view / prompt
+function startApp() {
     connection.connect(function (err) {
         if (err) throw err;
         console.log("connected as id " + connection.threadId);
+        customerView();
     });
 };
 
@@ -89,6 +90,8 @@ function promptBuy(allProducts) {
 function purchase(productID, quantity) {
     connection.query('SELECT * FROM products WHERE item_id=?', productID, function (err, item) {
         if (err) throw err;
+
+        // update stock quantity and product sales based on transaction
         var updatedQuantity = item[0].stock_quantity - quantity;
         var totalSale = item[0].price * item[0].stock_quantity;
         var productSalesTotal = item[0].product_sales + totalSale;
@@ -96,6 +99,7 @@ function purchase(productID, quantity) {
         console.log(`Product Sales Total: ${productSalesTotal}`)
         console.log(`Selected [${quantity}x] of [${item[0].product_name}]...`);
 
+        // if quantity is in stock, fulfill transaction
         if (updatedQuantity > 0) {
             connection.query('UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?', [updatedQuantity, productSalesTotal, productID], function (err, res) {
                 if (err) throw err;
@@ -105,7 +109,7 @@ function purchase(productID, quantity) {
             });
         } else {
             console.log('Sorry! We are out of stock!');
-            welcome();
+            customerView();
         }
     });
 };
@@ -129,7 +133,7 @@ function buyAgain() {
 };
 
 // start a prompt to ask what items the customer wants to buy
-function welcome() {
+function customerView() {
     inquirer.prompt([
         {
             type: "list",
@@ -140,7 +144,6 @@ function welcome() {
     ]).then(function (choice) {
         if (choice.welcome === 'BUY') {
             // connect to mysql and start buying process
-            connectSQL();
             buy();
         } else if (choice.welcome === 'EXIT') {
             // end mysql connection and app
@@ -156,17 +159,4 @@ function quit() {
     process.exit();
 };
 
-welcome();
-
-// ADD NEW TABLE TO PRODUCTS
-// -------------------
-// Challenge #3: Supervisor View (Final Level)
-
-// Create a new MySQL table called departments. Your table should include the following columns:
-// department_id
-// department_name
-// over_head_costs (A dummy number you set for each department)
-
-// Modify the products table so that there's a product_sales column, and modify your bamazonCustomer.js app so that when a customer purchases anything from the store, the price of the product multiplied by the quantity purchased is added to the product's product_sales column.
-// Make sure your app still updates the inventory listed in the products column.
-
+startApp();
