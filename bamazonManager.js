@@ -10,14 +10,8 @@ var Table = require('cli-table');
 // create connection to mysql
 var connection = mysql.createConnection({
     host: "localhost",
-
-    // Your port; if not 8889
     port: 8889,
-
-    // Your username
     user: "root",
-
-    // Your password
     password: "root",
     database: "bamazon"
 });
@@ -27,6 +21,7 @@ function startApp() {
     connection.connect(function (err) {
         if (err) throw err;
         console.log("connected as id " + connection.threadId);
+        console.log('\n');
         managerView();
     });
 };
@@ -70,6 +65,7 @@ function productsForSale() {
             table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity, allProducts[i].product_sales]);
         }
         console.log(table.toString());
+        console.log('\n');
         managerView();
     });
 };
@@ -81,14 +77,15 @@ function lowInventory() {
 
         var table = new Table({
             head: ['item_id', 'product_name', 'stock_quantity'],
-            colWidths: [10, 15, 18]
+            colWidths: [10, 25, 18]
         });
 
         for (var i = 0; i < allProducts.length; i++) {
-            table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].stock_quantity])
+            table.push([allProducts[i].item_id, allProducts[i].product_name, allProducts[i].stock_quantity]);
         }
         console.log(table.toString());
-        console.log('All items low in stock!');
+        console.log(`Found ${allProducts.length} items low in stock!`);
+        console.log('\n');
         managerView();
     });
 };
@@ -141,20 +138,27 @@ function updateStock() {
             }
         }
     ]).then(function (item) {
+
         // select stock of product from id and calculate new stock quantity
         connection.query(`SELECT stock_quantity, product_name FROM products WHERE item_id = ?`, item.id, function (err, stock) {
             if (err) throw err;
+
             var updatedStock = Number(item.quantity) + Number(stock[0].stock_quantity);
             var table = new Table({
                 head: ['item_id', 'product_name', 'stock_quantity'],
                 colWidths: [10, 15, 18]
             });
+
             table.push([Number(item.id), stock[0].product_name, updatedStock]);
+
+            console.log(`Adding [${item.quantity}x] of [${stock[0].product_name}] to stock!`);
             console.log(table.toString());
+            console.log(`New stock total!`);
 
             // update item_id and item_quantity
             connection.query(`UPDATE products SET stock_quantity = ? WHERE item_ID = ?`, [updatedStock, item.id], function (err, res) {
                 if (err) throw err;
+                console.log('\n');
                 managerView();
             });
         });
@@ -209,7 +213,7 @@ function addNewProduct() {
 // insert new product into products table
 function insertNewProduct(newProduct) {
     var table = new Table({
-        head: ['product_name', 'department_name', 'price', 'stock_quantity',],
+        head: ['product_name', 'department_name', 'price', 'stock_quantity'],
         colWidths: [25, 20, 10, 20]
     });
     table.push([newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock]);
@@ -220,13 +224,14 @@ function insertNewProduct(newProduct) {
         VALUE (?, ?, ?, ?, 0)`, [newProduct.productName, newProduct.departmentName, newProduct.price, newProduct.stock],
         function (err, res) {
             if (err) throw err;
+            console.log('\n');
             managerView();
         });
 };
 
 // quit app
 function quit() {
-    console.log('Exiting System');
+    console.log('Exiting System. Good Bye.');
     connection.end();
     process.exit();
 };
