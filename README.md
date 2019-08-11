@@ -19,3 +19,9 @@ The app will:
 
 ### Application
 - run in terminal: `node <filename.js>`
+
+### Technologies:
+#### Node.js
+#### MySQL
+- npm inquirer
+- npm cli-table
