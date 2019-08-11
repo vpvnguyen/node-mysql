@@ -33,6 +33,8 @@ var mysql = require('mysql');
 ## Application
 - Run in terminal/bash: `node <filename.js>`.
 
+![](github-customerview.gif)
+
 ## Technologies:
 - Node.js
 - MySQL
