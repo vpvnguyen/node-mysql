@@ -37,17 +37,17 @@ function buy() {
         if (err) throw err;
         // instantiate
         var table = new Table({
-            head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
-            colWidths: [10, 28, 18, 10, 18, 15]
+            head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity'],
+            colWidths: [10, 28, 18, 10, 18]
         });
 
         for (var i = 0; i < allProducts.length; i++) {
-            console.log(`\n`);
-            console.log(`id: ${allProducts[i].item_id}`);
-            console.log(`Item: ${allProducts[i].product_name}`);
-            console.log(`Department: ${allProducts[i].department_name}`);
-            console.log(`Price: ${allProducts[i].price}`);
-            console.log(`Stock: ${allProducts[i].stock_quantity}`);
+            // console.log(`\n`);
+            // console.log(`id: ${allProducts[i].item_id}`);
+            // console.log(`Item: ${allProducts[i].product_name}`);
+            // console.log(`Department: ${allProducts[i].department_name}`);
+            // console.log(`Price: ${allProducts[i].price}`);
+            // console.log(`Stock: ${allProducts[i].stock_quantity}`);
             // table is an Array, so you can `push`, `unshift`, `splice` and friends
             table.push(
                 [allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity]
@@ -103,14 +103,13 @@ function purchase(productID, quantity) {
         if (err) throw err;
         var updatedQuantity = item[0].stock_quantity - quantity;
         var totalSale = item[0].price * item[0].stock_quantity;
-        console.log(`Purchase of ${quantity}x ${item[0].product_name} complete!`);
-        console.log(`Total: $${totalSale}`);
-        console.log(`Previous Quantity: ${item[0].stock_quantity}`);
-        console.log(`Updated Quantity: ${updatedQuantity}`);
+
+        console.log(`Selected [${quantity}x] of [${item[0].product_name}]...`);
 
         if (updatedQuantity > 0) {
             connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [updatedQuantity, productID], function (err, res) {
                 if (err) throw err;
+                console.log(`Total: $${totalSale}`);
                 console.log(`Thank you for your purchase!\n`);
                 buyAgain();
             });
