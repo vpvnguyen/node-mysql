@@ -38,13 +38,6 @@ function buy() {
         });
 
         for (var i = 0; i < allProducts.length; i++) {
-            // console.log(`\n`);
-            // console.log(`id: ${allProducts[i].item_id}`);
-            // console.log(`Item: ${allProducts[i].product_name}`);
-            // console.log(`Department: ${allProducts[i].department_name}`);
-            // console.log(`Price: ${allProducts[i].price}`);
-            // console.log(`Stock: ${allProducts[i].stock_quantity}`);
-            // table is an Array, so you can `push`, `unshift`, `splice` and friends
             table.push(
                 [allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity]
             );
@@ -87,7 +80,6 @@ function promptBuy(allProducts) {
             }
         }
     ]).then(function (item) {
-        console.log('\n');
         // start purchase transaction
         purchase(item.id, item.quantity);
     });
