@@ -130,11 +130,11 @@ function updateStock() {
             name: 'quantity',
             message: 'How many would you like to add?',
             validate: function (input) {
-                if (isNaN(input) && Number(input) >= 0) {
+                if (!isNaN(input) && Number(input) >= 0) {
+                    return true;
+                } else {
                     console.log(' <- is not a valid number.');
                     return false;
-                } else {
-                    return true;
                 }
             }
         }
