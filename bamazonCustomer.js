@@ -31,25 +31,34 @@ function connectSQL() {
 function buy() {
     connection.query('SELECT * FROM products', function (err, allProducts) {
         if (err) throw err;
+        // instantiate
+        var table = new Table({
+            head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
+            colWidths: [10, 28, 18, 10, 18, 15]
+        });
+
         for (var i = 0; i < allProducts.length; i++) {
-            // console.log(res[i]);
             console.log(`\n`);
             console.log(`id: ${allProducts[i].item_id}`);
             console.log(`Item: ${allProducts[i].product_name}`);
             console.log(`Department: ${allProducts[i].department_name}`);
             console.log(`Price: ${allProducts[i].price}`);
             console.log(`Stock: ${allProducts[i].stock_quantity}`);
+            // table is an Array, so you can `push`, `unshift`, `splice` and friends
+            table.push(
+                [allProducts[i].item_id, allProducts[i].product_name, allProducts[i].department_name, allProducts[i].price, allProducts[i].stock_quantity]
+            );
         }
 
+        // log cli table of products
+        console.log(table.toString());
         // pass in results of all products in db
         promptBuy(allProducts);
-
     });
 };
 
 // start a prompt to ask what items the customer wants to buy
 function promptBuy(allProducts) {
-
     inquirer.prompt([
         {
             type: "input",
@@ -79,7 +88,6 @@ function promptBuy(allProducts) {
         }
     ]).then(function (item) {
         console.log('\n');
-
         // start purchase transaction
         purchase(item.id, item.quantity);
     });
@@ -124,13 +132,11 @@ function buyAgain() {
         } else if (choice.buyAgain === 'EXIT') {
             quit();
         }
-
     });
 };
 
 // start a prompt to ask what items the customer wants to buy
 function welcome() {
-
     inquirer.prompt([
         {
             type: "list",
@@ -139,10 +145,6 @@ function welcome() {
             choices: ['BUY', 'EXIT']
         }
     ]).then(function (choice) {
-
-        // ask customer's what they want to buy from the list of items in inventory
-        console.log(`User Selected: ${choice.welcome}`);
-
         if (choice.welcome === 'BUY') {
             // connect to mysql and start buying process
             connectSQL();
@@ -160,22 +162,6 @@ function quit() {
     connection.end();
     process.exit();
 };
-
-// CLI TABLE
-
-// // instantiate
-// var table = new Table({
-//     head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity', 'product_sales'],
-//     colWidths: [10, 30, 18, 10, 15, 15]
-// });
-
-// // table is an Array, so you can `push`, `unshift`, `splice` and friends
-// table.push(
-//     [1, 'Coleman 2 person tent', 'Outdoor', 100, 20000],
-//     [200, 'something something', 'Automotive', 20000, 1000000]
-// );
-
-// console.log(table.toString());
 
 welcome();
 
