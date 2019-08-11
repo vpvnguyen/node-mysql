@@ -109,9 +109,10 @@ function addDeptDetails(deptNames) {
                 // if department already exists, return false
                 if (!deptNames.includes(input.toLowerCase())) {
                     return true;
+                } else {
+                    console.log(' <-- Duplicate department name');
+                    return false;
                 }
-                console.log(' <-- Duplicate department name')
-                return false;
             }
         },
         {
@@ -120,11 +121,12 @@ function addDeptDetails(deptNames) {
             name: 'overHeadCost',
             // input is > 0
             validate: function (input) {
-                if (!isNaN(input) && input > 0) {
+                if (!isNaN(input) && Number(input) >= 0) {
                     return true;
+                } else {
+                    console.log(' <-- Enter a number')
+                    return false;
                 }
-                console.log(' <-- Enter a number > 0')
-                return false;
             }
         }
     ]).then(function (newDept) {

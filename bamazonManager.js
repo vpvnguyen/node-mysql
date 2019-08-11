@@ -172,20 +172,10 @@ function addNewProduct() {
         {
             type: 'input',
             message: 'Enter product name: ',
-            name: 'productName'
-        },
-        {
-            type: 'input',
-            message: 'Enter department name: ',
-            name: 'departmentName'
-        },
-        {
-            type: 'input',
-            message: 'Price: ',
-            name: 'price',
+            name: 'productName',
             validate: function (input) {
-                if (isNaN(input) && Number(input) >= 0) {
-                    console.log(' <- is not a valid number.');
+                if (!isNaN(input)) {
+                    console.log(' <-- enter a product name');
                     return false;
                 } else {
                     return true;
@@ -194,14 +184,40 @@ function addNewProduct() {
         },
         {
             type: 'input',
-            message: 'How many would you like to add?',
-            name: 'stock',
+            message: 'Enter department name: ',
+            name: 'departmentName',
             validate: function (input) {
-                if (isNaN(input) && Number(input) >= 0) {
-                    console.log(' <- is not a valid number.');
+                if (!isNaN(input)) {
+                    console.log(' <-- enter a product name');
                     return false;
                 } else {
                     return true;
+                }
+            }
+        },
+        {
+            type: 'input',
+            message: 'Price: ',
+            name: 'price',
+            validate: function (input) {
+                if (!isNaN(input) && Number(input) >= 0) {
+                    return true;
+                } else {
+                    console.log(' <- is not a valid number.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            message: 'How many would you like to add?',
+            name: 'stock',
+            validate: function (input) {
+                if (!isNaN(input) && Number(input) >= 0) {
+                    return true;
+                } else {
+                    console.log(' <- is not a valid number.');
+                    return false;
                 }
             }
         }

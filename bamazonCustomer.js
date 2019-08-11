@@ -61,7 +61,7 @@ function promptBuy(allProducts) {
             message: 'Enter the ID of item you want to buy:',
             name: 'id',
             validate: function (input) {
-                if (isNaN(input) == false && Number(input) <= allProducts.length && Number(input) > 0) {
+                if (!isNaN(input) && Number(input) <= allProducts.length && Number(input) > 0) {
                     return true;
                 } else {
                     console.log(' <- is not a valid number.');
@@ -74,11 +74,11 @@ function promptBuy(allProducts) {
             name: 'quantity',
             message: 'How many would you like to buy?',
             validate: function (input) {
-                if (isNaN(input)) {
+                if (!isNaN(input)) {
+                    return true;
+                } else {
                     console.log(' <- is not a valid number.');
                     return false;
-                } else {
-                    return true;
                 }
             }
         }
