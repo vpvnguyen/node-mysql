@@ -12,18 +12,19 @@ var Table = require('cli-table');
 
 // create connection to mysql
 var connection = mysql.createConnection({
-    host: "localhost",
+    host: 'localhost',
     port: 8889,
-    user: "root",
-    password: "root",
-    database: "bamazon"
+    user: 'root',
+    password: 'root',
+    database: 'bamazon'
 });
 
 // connect to mysql and start customer view / prompt
 function startApp() {
     connection.connect(function (err) {
         if (err) throw err;
-        console.log("connected as id " + connection.threadId);
+        console.log('connected as id ' + connection.threadId);
+        console.log('\n');
         customerView();
     });
 };
@@ -46,6 +47,7 @@ function buy() {
 
         // log cli table of products
         console.log(table.toString());
+        console.log('\n');
         // pass in results of all products in db
         promptBuy(allProducts);
     });
@@ -55,9 +57,9 @@ function buy() {
 function promptBuy(allProducts) {
     inquirer.prompt([
         {
-            type: "input",
-            message: "Enter the ID of item you want to buy:",
-            name: "id",
+            type: 'input',
+            message: 'Enter the ID of item you want to buy:',
+            name: 'id',
             validate: function (input) {
                 if (isNaN(input) == false && Number(input) <= allProducts.length && Number(input) > 0) {
                     return true;
@@ -68,9 +70,9 @@ function promptBuy(allProducts) {
             }
         },
         {
-            type: "input",
-            name: "quantity",
-            message: "How many would you like to buy?",
+            type: 'input',
+            name: 'quantity',
+            message: 'How many would you like to buy?',
             validate: function (input) {
                 if (isNaN(input)) {
                     console.log(' <- is not a valid number.');
@@ -81,6 +83,7 @@ function promptBuy(allProducts) {
             }
         }
     ]).then(function (item) {
+        console.log('\n');
         // start purchase transaction
         purchase(item.id, item.quantity);
     });
@@ -105,10 +108,13 @@ function purchase(productID, quantity) {
                 if (err) throw err;
                 console.log(`Total: $${totalSale}`);
                 console.log(`Thank you for your purchase!\n`);
+                console.log('\n');
+
                 buyAgain();
             });
         } else {
             console.log('Sorry! We are out of stock!');
+            console.log('\n');
             customerView();
         }
     });
@@ -118,9 +124,9 @@ function purchase(productID, quantity) {
 function buyAgain() {
     inquirer.prompt([
         {
-            type: "list",
-            message: "Would you like to purchase another product?",
-            name: "buyAgain",
+            type: 'list',
+            message: 'Would you like to purchase another product?',
+            name: 'buyAgain',
             choices: ['BUY AGAIN', 'EXIT']
         }
     ]).then(function (choice) {
@@ -136,9 +142,9 @@ function buyAgain() {
 function customerView() {
     inquirer.prompt([
         {
-            type: "list",
-            message: "Welcome! What would you like to do?",
-            name: "welcome",
+            type: 'list',
+            message: 'Welcome! What would you like to do?',
+            name: 'welcome',
             choices: ['BUY', 'EXIT']
         }
     ]).then(function (choice) {
